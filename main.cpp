@@ -33,10 +33,10 @@ int main()
 {
     float ax,ay,az;
     receive(rcmd, cmdflag);
+    pc.printf("Please input 1 to 6.\r\n");
     for(int i = 0; i<50; i++) {
         sensor.sen_acc(&ax,&ay,&az);
 //        pc.printf("acc : %f,%f,%f\r\n",ax,ay,az);
-        pc.printf("Please input 1 to 6.\r\n");
         if (ax < -9){
             dice = 1;
         }
@@ -61,6 +61,8 @@ int main()
             cmd = rcmd - '1' + 1;
             if(cmd == dice) {
                 pc.printf("%d is Correct!!\r\n", cmd);
+                pc.printf("You win!!\r\n");
+                break;
             }
             else {
                 pc.printf("%d is Incorrect!!\r\n", cmd);
