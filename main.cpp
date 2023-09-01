@@ -1,42 +1,25 @@
 #include "mbed.h"
 #include "HEPTA_EPS.h"
 #include "HEPTA_SENSOR.h"
+#include "HEPTA_COM.h"
+
 RawSerial pc(USBTX,USBRX,9600);
 HEPTA_EPS eps(p16,p26);
 HEPTA_SENSOR sensor(p17,
                   p28,p27,0x19,0x69,0x13,
                   p13, p14,p25,p24);
+HEPTA_COM com(p9, p10, 9600);
 
 int rcmd = 0, cmdflag = 0;
 int dice = 0, cmd = 0;
 
-void commandget()
-{
-    rcmd = pc.getc();
-    cmdflag = 1;
-}
-
-void receive(int rcmd, int cmdflag)
-{
-    pc.attach(commandget, Serial::RxIrq);
-}
-
-void initialize()
-{
-    rcmd = 0;
-    cmdflag = 0;
-    dice = 0;
-    cmd = 0;
-}
-
 int main()
 {
     float ax,ay,az;
-    receive(rcmd, cmdflag);
-    pc.printf("Please input 1 to 6.\r\n");
-    for(int i = 0; i<50; i++) {
+    com.printf("Please input 1 to 6.\r\n");
+    while(1) {
         sensor.sen_acc(&ax,&ay,&az);
-//        pc.printf("acc : %f,%f,%f\r\n",ax,ay,az);
+        com.xbee_receive(&rcmd, &cmdflag);
         if (ax < -9){
             dice = 1;
         }
@@ -60,14 +43,14 @@ int main()
         if(cmdflag == 1) {
             cmd = rcmd - '1' + 1;
             if(cmd == dice) {
-                pc.printf("%d is Correct!!\r\n", cmd);
-                pc.printf("You win!!\r\n");
+                com.printf("%d is Correct!!\r\n", cmd);
+                com.printf("You win!!\r\n");
                 break;
             }
             else {
-                pc.printf("%d is Incorrect!!\r\n", cmd);
+                com.printf("%d is Incorrect!!\r\n", cmd);
             }
-            initialize();
+            com.initialize();
         }
     }
 }
